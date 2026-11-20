@@ -1,0 +1,231 @@
+{
+  "title": "준비해 둔 질문",
+  "owner": "질문과 SQL은 김세은이 골랐습니다. 요금제별 이탈(plan_churn)과 문의 유무별 이탈(inquiry_churn)은 김세은이 더했습니다. «확인할 값»은 20_데이터/실측결과.md 에서 옵니다.",
+  "files": [
+    { "match": "상담내역", "table": "support_tickets" },
+    { "match": "고객목록", "table": "customers" },
+    { "match": "상담원목록", "table": "agents" }
+  ],
+  "questions": [
+    {
+      "id": "funnel",
+      "q": "퍼널 단계마다 몇 명이 남나요?",
+      "judge": "한 사람이 여러 번 방문해도 한 명으로 셉니다 — 세는 단위는 «사람»",
+      "sql": "SELECT funnel_step AS 단계,\n       MIN(step_order) AS 순서,\n       COUNT(DISTINCT visitor_id) AS 사람\nFROM funnel_events\nGROUP BY funnel_step\nORDER BY 순서",
+      "check": [
+        {
+          "where": {
+            "단계": "랜딩방문"
+          },
+          "col": "사람",
+          "want": 180000
+        },
+        {
+          "where": {
+            "단계": "첫결제"
+          },
+          "col": "사람",
+          "want": 6485
+        }
+      ]
+    },
+    {
+      "id": "device",
+      "q": "기기별로 신청을 끝까지 마친 비율은?",
+      "judge": "분모는 «신청을 시작한 사람» — 방문자 전체가 아닙니다",
+      "sql": "WITH v AS (SELECT DISTINCT visitor_id, device FROM sessions),\n     s AS (SELECT DISTINCT visitor_id FROM funnel_events WHERE funnel_step = '신청시작'),\n     c AS (SELECT DISTINCT visitor_id FROM funnel_events WHERE funnel_step = '신청완료')\nSELECT v.device AS 기기,\n       COUNT(*) AS 신청시작,\n       COUNT(c.visitor_id) AS 신청완료,\n       ROUND(100.0 * COUNT(c.visitor_id) / COUNT(*), 1) AS 완료율\nFROM v\nJOIN s USING (visitor_id)\nLEFT JOIN c USING (visitor_id)\nGROUP BY v.device\nORDER BY 신청시작 DESC",
+      "check": [
+        {
+          "where": {
+            "기기": "mobile"
+          },
+          "col": "완료율",
+          "want": 34.1
+        },
+        {
+          "where": {
+            "기기": "desktop"
+          },
+          "col": "완료율",
+          "want": 55.1
+        }
+      ]
+    },
+    {
+      "id": "channel",
+      "q": "유입 채널별로 첫 결제까지 간 비율은?",
+      "judge": "방문한 사람 중 첫 결제까지 간 사람 — 채널은 사람마다 하나입니다",
+      "sql": "WITH v AS (SELECT DISTINCT visitor_id, acquisition_channel FROM sessions),\n     p AS (SELECT DISTINCT visitor_id FROM funnel_events WHERE funnel_step = '첫결제')\nSELECT v.acquisition_channel AS 채널,\n       COUNT(*) AS 방문,\n       COUNT(p.visitor_id) AS 첫결제,\n       ROUND(100.0 * COUNT(p.visitor_id) / COUNT(*), 2) AS 전환율\nFROM v\nLEFT JOIN p USING (visitor_id)\nGROUP BY v.acquisition_channel\nORDER BY 전환율 DESC",
+      "check": [
+        {
+          "where": {
+            "채널": "추천"
+          },
+          "col": "전환율",
+          "want": 5.49
+        },
+        {
+          "where": {
+            "채널": "제휴"
+          },
+          "col": "전환율",
+          "want": 2.25
+        }
+      ]
+    },
+    {
+      "id": "recontact",
+      "q": "문의 분류별로 다시 문의하는 비율은?",
+      "judge": "한 줄은 «문의 한 건» — 고객 한 명이 아닙니다",
+      "sql": "SELECT ticket_category AS 분류,\n       COUNT(*) AS 문의,\n       ROUND(100.0 * AVG(CASE WHEN is_recontact THEN 1 ELSE 0 END), 1) AS 재문의율\nFROM support_tickets\nGROUP BY ticket_category\nORDER BY 재문의율 DESC",
+      "check": [
+        {
+          "where": {
+            "분류": "해지"
+          },
+          "col": "재문의율",
+          "want": 36.0
+        },
+        {
+          "where": {
+            "분류": "가입변경"
+          },
+          "col": "재문의율",
+          "want": 15.8
+        }
+      ]
+    },
+    {
+      "id": "team",
+      "q": "팀별 재문의율과 직원 만족도는?",
+      "judge": "만족도가 낮은 팀이 재문의도 많아 보입니다. 그런데 팀마다 받는 문의가 다릅니다 — 원인이라고 말하지 않습니다",
+      "sql": "SELECT a.team AS 팀,\n       ROUND(AVG(a.job_satisfaction), 2) AS 직무만족,\n       ROUND(100.0 * AVG(CASE WHEN t.is_recontact THEN 1 ELSE 0 END), 1) AS 재문의율,\n       COUNT(*) AS 문의\nFROM support_tickets t\nJOIN agents a USING (agent_id)\nGROUP BY a.team\nORDER BY 재문의율",
+      "check": [
+        {
+          "where": {
+            "팀": "해지방어팀"
+          },
+          "col": "재문의율",
+          "want": 39.1
+        },
+        {
+          "where": {
+            "팀": "가입팀"
+          },
+          "col": "직무만족",
+          "want": 3.67
+        }
+      ]
+    },
+    {
+      "id": "churn",
+      "q": "한 해 동안 떠난 고객은 몇 %인가요?",
+      "judge": "분모는 고객 50,000명 전체 — 기간은 2025년 한 해",
+      "sql": "SELECT COUNT(*) AS 고객,\n       SUM(CASE WHEN is_churned THEN 1 ELSE 0 END) AS 이탈,\n       ROUND(100.0 * AVG(CASE WHEN is_churned THEN 1 ELSE 0 END), 1) AS 이탈률\nFROM customers",
+      "check": [
+        {
+          "col": "이탈",
+          "want": 7256
+        },
+        {
+          "col": "이탈률",
+          "want": 14.5
+        }
+      ]
+    },
+    {
+      "id": "arpu",
+      "q": "고객 한 명이 한 달에 내는 돈은 평균 얼마인가요?",
+      "judge": "한 줄은 «고객 한 명의 한 달» — 그래서 행 평균이 곧 한 달 평균입니다",
+      "sql": "SELECT COUNT(*) AS 고객월,\n       ROUND(SUM(billing_amount) / COUNT(*)) AS 월평균_청구액\nFROM usage_monthly",
+      "check": [
+        {
+          "col": "월평균_청구액",
+          "want": 33417
+        }
+      ]
+    },
+    {
+      "id": "voc",
+      "q": "VOC 분류별로 그 고객이 떠난 비율은?",
+      "judge": "VOC를 남긴 고객만의 이야기입니다 — 전체 고객과 바로 비교하면 틀립니다",
+      "sql": "SELECT v.voc_category AS 분류,\n       COUNT(*) AS VOC,\n       ROUND(100.0 * AVG(CASE WHEN c.is_churned THEN 1 ELSE 0 END), 1) AS 이탈률\nFROM voc v\nJOIN customers c USING (customer_id)\nGROUP BY v.voc_category\nORDER BY 이탈률 DESC",
+      "check": [
+        {
+          "where": {
+            "분류": "해지관련"
+          },
+          "col": "이탈률",
+          "want": 23.0
+        },
+        {
+          "where": {
+            "분류": "요금"
+          },
+          "col": "이탈률",
+          "want": 7.0
+        }
+      ]
+    },
+    {
+      "id": "fanout",
+      "q": "⚠ 고객 수를 세는데 이용 기록과 이어 붙였더니?",
+      "judge": "한 줄의 단위가 다른 표를 이어 붙이면 줄이 불어납니다 — 고객 한 명이 열두 줄이 됩니다. 그리고 짝이 없는 줄은 조용히 사라집니다 — 이용 기록이 없는 고객 15명(2025-01-01에 떠난 고객)이 빠져 49,985명이 됩니다",
+      "sql": "SELECT COUNT(*) AS 이어붙인_줄,\n       COUNT(DISTINCT c.customer_id) AS 실제_고객\nFROM customers c\nJOIN usage_monthly u USING (customer_id)",
+      "check": [
+        {
+          "col": "이어붙인_줄",
+          "want": 523825
+        },
+        {
+          "col": "실제_고객",
+          "want": 49985
+        }
+      ]
+    },
+    {
+      "id": "inquiry_churn",
+      "q": "2025년 한 해 동안, 문의를 한 번 이상 한 고객은 문의가 한 번도 없는 고객보다 떠난 비율이 높은가요?",
+      "judge": "문의가 한 번도 없는 고객도 비교에 넣는다. 이 답으로 «문의가 떠나게 만든다»고 말하지 않는다",
+      "sql": "WITH t AS (SELECT customer_id, COUNT(*) AS n\n           FROM support_tickets\n           GROUP BY customer_id)\nSELECT CASE WHEN t.customer_id IS NULL THEN '문의 없음' ELSE '문의 있음' END AS 구분,\n       COUNT(*) AS 고객,\n       SUM(CASE WHEN c.is_churned THEN 1 ELSE 0 END) AS 이탈,\n       ROUND(100.0 * AVG(CASE WHEN c.is_churned THEN 1 ELSE 0 END), 1) AS 이탈률\nFROM customers c\nLEFT JOIN t ON c.customer_id = t.customer_id\nGROUP BY 1\nORDER BY 이탈률 DESC",
+      "check": [
+        {
+          "where": {
+            "구분": "문의 없음"
+          },
+          "col": "이탈률",
+          "want": 19.2
+        },
+        {
+          "where": {
+            "구분": "문의 있음"
+          },
+          "col": "이탈률",
+          "want": 9.2
+        }
+      ]
+    },
+    {
+      "id": "plan_churn",
+      "q": "2025년 한 해 동안, 요금제별 고객 가운데 떠난 비율이 가장 높은 요금제는 어디인가요?",
+      "judge": "떠난 «수»가 아니라 «비율»로 본다. 요금제마다 고객 수가 다르다",
+      "sql": "SELECT plan_type AS 요금제,\n       COUNT(*) AS 고객,\n       SUM(CASE WHEN is_churned THEN 1 ELSE 0 END) AS 이탈,\n       ROUND(100.0 * AVG(CASE WHEN is_churned THEN 1 ELSE 0 END), 1) AS 이탈률\nFROM customers\nGROUP BY plan_type\nORDER BY 이탈률 DESC",
+      "check": [
+        {
+          "where": {
+            "요금제": "알뜰"
+          },
+          "col": "이탈률",
+          "want": 19.5
+        },
+        {
+          "where": {
+            "요금제": "5G프리미엄"
+          },
+          "col": "이탈률",
+          "want": 10.8
+        }
+      ]
+    }
+  ]
+}

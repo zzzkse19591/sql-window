@@ -1,0 +1,630 @@
+{
+ "note": "한 줄이 무엇인지(grain)는 사람이 정한 것입니다. 조인하기 전에 반드시 봅니다.",
+ "tables": {
+  "ad_spend": {
+   "grain": "캠페인 × 일",
+   "rows": 5984,
+   "columns": [
+    {
+     "name": "campaign_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "spend_date",
+     "type": "DATE"
+    },
+    {
+     "name": "impressions",
+     "type": "BIGINT"
+    },
+    {
+     "name": "clicks",
+     "type": "BIGINT"
+    },
+    {
+     "name": "spend",
+     "type": "BIGINT"
+    }
+   ]
+  },
+  "agents": {
+   "grain": "상담원 1명",
+   "rows": 120,
+   "columns": [
+    {
+     "name": "agent_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "team",
+     "type": "VARCHAR",
+     "values": [
+      "가입팀",
+      "요금팀",
+      "일반",
+      "품질팀",
+      "해지방어팀"
+     ]
+    },
+    {
+     "name": "hire_date",
+     "type": "DATE"
+    },
+    {
+     "name": "job_satisfaction",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "burnout_score",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "training_hours",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "is_resigned",
+     "type": "BOOLEAN"
+    }
+   ]
+  },
+  "campaigns": {
+   "grain": "캠페인 1개",
+   "rows": 120,
+   "columns": [
+    {
+     "name": "campaign_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "campaign_name",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "acquisition_channel",
+     "type": "VARCHAR",
+     "values": [
+      "검색",
+      "디스플레이",
+      "오프라인",
+      "제휴",
+      "추천"
+     ]
+    },
+    {
+     "name": "objective",
+     "type": "VARCHAR",
+     "values": [
+      "리타게팅",
+      "인지",
+      "전환"
+     ]
+    },
+    {
+     "name": "start_date",
+     "type": "DATE"
+    },
+    {
+     "name": "end_date",
+     "type": "DATE"
+    },
+    {
+     "name": "target_segment",
+     "type": "VARCHAR",
+     "values": [
+      "20대",
+      "30대",
+      "40대",
+      "50대",
+      "60대이상"
+     ]
+    },
+    {
+     "name": "total_budget",
+     "type": "INTEGER"
+    }
+   ]
+  },
+  "csat_survey": {
+   "grain": "설문 1건",
+   "rows": 9687,
+   "columns": [
+    {
+     "name": "survey_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "ticket_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "customer_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "survey_date",
+     "type": "DATE"
+    },
+    {
+     "name": "csat",
+     "type": "INTEGER"
+    },
+    {
+     "name": "nps",
+     "type": "INTEGER"
+    },
+    {
+     "name": "comment",
+     "type": "VARCHAR"
+    }
+   ]
+  },
+  "customers": {
+   "grain": "고객 1명",
+   "rows": 50000,
+   "columns": [
+    {
+     "name": "customer_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "customer_name",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "visitor_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "signup_date",
+     "type": "DATE"
+    },
+    {
+     "name": "acquisition_channel",
+     "type": "VARCHAR",
+     "values": [
+      "검색",
+      "디스플레이",
+      "오프라인",
+      "제휴",
+      "추천"
+     ]
+    },
+    {
+     "name": "campaign_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "plan_type",
+     "type": "VARCHAR",
+     "values": [
+      "5G스탠다드",
+      "5G프리미엄",
+      "LTE기본",
+      "LTE무제한",
+      "알뜰"
+     ]
+    },
+    {
+     "name": "monthly_fee",
+     "type": "INTEGER"
+    },
+    {
+     "name": "age_group",
+     "type": "VARCHAR",
+     "values": [
+      "20대",
+      "30대",
+      "40대",
+      "50대",
+      "60대이상"
+     ]
+    },
+    {
+     "name": "region",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "device_os",
+     "type": "VARCHAR",
+     "values": [
+      "Android",
+      "iOS"
+     ]
+    },
+    {
+     "name": "is_churned",
+     "type": "BOOLEAN"
+    },
+    {
+     "name": "churn_date",
+     "type": "DATE"
+    }
+   ]
+  },
+  "experiment_assignments": {
+   "grain": "실험 × 방문자",
+   "rows": 257395,
+   "columns": [
+    {
+     "name": "experiment_id",
+     "type": "VARCHAR",
+     "values": [
+      "EXP-001",
+      "EXP-002",
+      "EXP-003",
+      "EXP-004",
+      "EXP-005"
+     ]
+    },
+    {
+     "name": "visitor_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "variant",
+     "type": "VARCHAR",
+     "values": [
+      "control",
+      "treatment"
+     ]
+    },
+    {
+     "name": "assigned_at",
+     "type": "DATE"
+    }
+   ]
+  },
+  "experiments": {
+   "grain": "실험 1개",
+   "rows": 5,
+   "columns": [
+    {
+     "name": "experiment_id",
+     "type": "VARCHAR",
+     "values": [
+      "EXP-001",
+      "EXP-002",
+      "EXP-003",
+      "EXP-004",
+      "EXP-005"
+     ]
+    },
+    {
+     "name": "experiment_name",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "hypothesis",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "target_funnel_step",
+     "type": "VARCHAR",
+     "values": [
+      "신청시작",
+      "신청완료",
+      "요금제조회"
+     ]
+    },
+    {
+     "name": "primary_metric",
+     "type": "VARCHAR",
+     "values": [
+      "신청 시작률",
+      "신청 완료율",
+      "조회 전환율"
+     ]
+    },
+    {
+     "name": "guardrail_metric",
+     "type": "VARCHAR",
+     "values": [
+      "90일 유지율",
+      "ARPU",
+      "CS 문의율",
+      "이탈률",
+      "해지 문의율"
+     ]
+    },
+    {
+     "name": "start_date",
+     "type": "VARCHAR",
+     "values": [
+      "2025-02-01",
+      "2025-04-01",
+      "2025-05-01",
+      "2025-07-01",
+      "2025-10-01"
+     ]
+    },
+    {
+     "name": "end_date",
+     "type": "VARCHAR",
+     "values": [
+      "2025-03-31",
+      "2025-06-30",
+      "2025-09-30",
+      "2025-10-31",
+      "2025-12-31"
+     ]
+    }
+   ]
+  },
+  "funnel_events": {
+   "grain": "퍼널 단계 도달 1건",
+   "rows": 301053,
+   "columns": [
+    {
+     "name": "event_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "visitor_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "session_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "event_timestamp",
+     "type": "TIMESTAMP_NS"
+    },
+    {
+     "name": "event_date",
+     "type": "DATE"
+    },
+    {
+     "name": "funnel_step",
+     "type": "VARCHAR",
+     "values": [
+      "개통",
+      "랜딩방문",
+      "신청시작",
+      "신청완료",
+      "요금제조회",
+      "첫결제"
+     ]
+    },
+    {
+     "name": "step_order",
+     "type": "BIGINT"
+    }
+   ]
+  },
+  "sessions": {
+   "grain": "방문 세션 1회",
+   "rows": 294064,
+   "columns": [
+    {
+     "name": "session_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "visitor_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "session_date",
+     "type": "DATE"
+    },
+    {
+     "name": "acquisition_channel",
+     "type": "VARCHAR",
+     "values": [
+      "검색",
+      "디스플레이",
+      "오프라인",
+      "제휴",
+      "추천"
+     ]
+    },
+    {
+     "name": "campaign_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "device",
+     "type": "VARCHAR",
+     "values": [
+      "desktop",
+      "mobile",
+      "tablet"
+     ]
+    },
+    {
+     "name": "is_first_visit",
+     "type": "BOOLEAN"
+    },
+    {
+     "name": "duration_sec",
+     "type": "BIGINT"
+    }
+   ]
+  },
+  "support_tickets": {
+   "grain": "문의 1건",
+   "rows": 32789,
+   "columns": [
+    {
+     "name": "ticket_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "customer_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "agent_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "created_date",
+     "type": "DATE"
+    },
+    {
+     "name": "contact_channel",
+     "type": "VARCHAR",
+     "values": [
+      "앱",
+      "이메일",
+      "전화",
+      "챗봇"
+     ]
+    },
+    {
+     "name": "ticket_category",
+     "type": "VARCHAR",
+     "values": [
+      "가입변경",
+      "기타",
+      "요금",
+      "품질",
+      "해지"
+     ]
+    },
+    {
+     "name": "duration_min",
+     "type": "INTEGER"
+    },
+    {
+     "name": "resolution_hours",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "status",
+     "type": "VARCHAR",
+     "values": [
+      "보류",
+      "완료",
+      "진행중"
+     ]
+    },
+    {
+     "name": "is_recontact",
+     "type": "BOOLEAN"
+    }
+   ]
+  },
+  "usage_monthly": {
+   "grain": "고객 × 월",
+   "rows": 523825,
+   "columns": [
+    {
+     "name": "customer_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "year_month",
+     "type": "VARCHAR",
+     "values": [
+      "2025-01",
+      "2025-02",
+      "2025-03",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-07",
+      "2025-08",
+      "2025-09",
+      "2025-10",
+      "2025-11",
+      "2025-12"
+     ]
+    },
+    {
+     "name": "data_gb",
+     "type": "DOUBLE"
+    },
+    {
+     "name": "voice_min",
+     "type": "BIGINT"
+    },
+    {
+     "name": "sms_count",
+     "type": "BIGINT"
+    },
+    {
+     "name": "billing_amount",
+     "type": "INTEGER"
+    },
+    {
+     "name": "app_login_count",
+     "type": "INTEGER"
+    },
+    {
+     "name": "service_count",
+     "type": "BIGINT"
+    },
+    {
+     "name": "is_active",
+     "type": "BOOLEAN"
+    }
+   ]
+  },
+  "voc": {
+   "grain": "VOC 접수 1건",
+   "rows": 7718,
+   "columns": [
+    {
+     "name": "voc_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "customer_id",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "received_date",
+     "type": "DATE"
+    },
+    {
+     "name": "contact_channel",
+     "type": "VARCHAR",
+     "values": [
+      "앱",
+      "이메일",
+      "전화",
+      "챗봇"
+     ]
+    },
+    {
+     "name": "voc_type",
+     "type": "VARCHAR",
+     "values": [
+      "문의",
+      "불만",
+      "제안",
+      "칭찬"
+     ]
+    },
+    {
+     "name": "voc_category",
+     "type": "VARCHAR",
+     "values": [
+      "기타",
+      "서비스",
+      "앱기능",
+      "요금",
+      "품질",
+      "해지관련"
+     ]
+    },
+    {
+     "name": "content",
+     "type": "VARCHAR"
+    },
+    {
+     "name": "sentiment",
+     "type": "VARCHAR",
+     "values": [
+      "긍정",
+      "부정",
+      "중립"
+     ]
+    }
+   ]
+  }
+ }
+}

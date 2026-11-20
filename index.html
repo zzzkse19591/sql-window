@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>데이터에 묻는 창</title>
+<meta name="description" content="질문을 고르거나 쓰면 SQL이 돌고 표가 뜹니다. 모든 답 옆에 SQL이 있습니다. 데이터베이스는 이 브라우저 안에 있습니다.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app">
+
+  <header class="top">
+    <div class="badge">4주차 · 목업</div>
+    <h1>데이터에 묻는 창</h1>
+    <p class="muted">질문을 고르거나 쓰면 <b>SQL</b>이 돌고 표가 뜹니다.
+      <b>모든 답 옆에 SQL이 있습니다</b> — 어떻게 셌는지 보이지 않는 숫자는 믿지 않습니다.</p>
+    <p id="engine" class="engine">데이터 엔진 준비 중…</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="preset" aria-selected="true">준비한 질문</button>
+    <button role="tab" data-tab="ask" aria-selected="false">직접 묻기</button>
+    <button role="tab" data-tab="tables" aria-selected="false">표 보기</button>
+    <button role="tab" data-tab="mine" aria-selected="false">내 파일로</button>
+  </nav>
+
+  <section id="tab-preset" class="panel">
+    <div id="qlist" class="qlist"></div>
+  </section>
+
+  <section id="tab-ask" class="panel" hidden>
+    <label class="label" for="nl">문장으로 묻기</label>
+    <textarea id="nl" rows="2" placeholder="예) 요금제별 고객 수와 평균 월 요금은?"></textarea>
+    <div class="row"><button id="btn-nl" class="ghost">SQL 만들기 (AI)</button></div>
+    <p id="nl-msg" class="note" hidden></p>
+    <label class="label" for="sql" style="margin-top:14px">SQL — 읽고, 고치고, 실행합니다</label>
+    <textarea id="sql" rows="8" class="code" spellcheck="false">SELECT plan_type AS 요금제,
+       COUNT(*) AS 고객,
+       ROUND(AVG(monthly_fee)) AS 평균_월요금
+FROM customers
+GROUP BY plan_type
+ORDER BY 고객 DESC</textarea>
+    <div class="row"><button id="btn-run" class="primary">실행</button></div>
+    <div id="ask-out"></div>
+  </section>
+
+  <section id="tab-tables" class="panel" hidden>
+    <p class="note" id="schema-note"></p>
+    <div id="tables"></div>
+  </section>
+
+  <section id="tab-mine" class="panel" hidden>
+    <p class="small">시스템에서 내려받은 엑셀이나 CSV를 넣으면, <b>준비한 질문</b>과 <b>직접 묻기</b>가 그 파일로 돕니다.
+      다음 달 파일을 넣으면 같은 질문이 다음 달 숫자를 냅니다.</p>
+    <label id="drop" class="drop" for="mine-file">
+      파일을 여기에 끌어다 놓거나 눌러서 고르기 (여러 개 한꺼번에)
+      <input id="mine-file" type="file" accept=".xlsx,.xls,.csv" multiple hidden>
+    </label>
+    <div id="mine-list"></div>
+    <div class="row"><button id="btn-mine-reset" class="ghost" hidden>원래 데이터로 돌아가기</button></div>
+    <p class="note">파일은 <b>이 브라우저를 떠나지 않습니다.</b> 읽기도 계산도 이 화면 안에서 합니다.
+      «문장으로 묻기»를 눌러도 AI에게는 질문 문장과 «표 보기»의 표 설명만 갑니다. 내 파일의 내용은 가지 않습니다.</p>
+    <p class="small muted" id="mine-rule"></p>
+  </section>
+
+  <footer class="fineprint">
+    데이터는 전부 만들어낸 것입니다. 데이터베이스(DuckDB)는 <b>이 브라우저 안</b>에서 돕니다.
+    AI에게는 질문 문장과 표 설명만 보냅니다 — 데이터는 보내지 않습니다.
+  </footer>
+</main>
+<script src="lib/xlsx.full.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
